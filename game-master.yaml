@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: game-master
+spec:
+  selector:
+    matchLabels:
+      run: game-master
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: game-master
+    spec:
+      containers:
+      - name: game-master
+        imagePullPolicy: Never
+        image: game-master:latest
+        ports:
+        - containerPort: 8000

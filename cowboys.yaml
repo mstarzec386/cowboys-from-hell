@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cowboys
+spec:
+  selector:
+    matchLabels:
+      run: cowboys
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        run: cowboys
+    spec:
+      containers:
+      - name: cowboys
+        imagePullPolicy: Never
+        image: cowboy:latest
+        ports:
+        - containerPort: 8000
