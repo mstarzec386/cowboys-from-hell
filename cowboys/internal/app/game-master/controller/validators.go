@@ -6,7 +6,7 @@ import (
 	"cowboys/internal/pkg/cowboys"
 )
 
-func validateRegisterBody(body *cowboys.RegisterRequestBody) error {
+func validateRegisterBody(body *cowboys.RegisterCowboy) error {
 	if body.Host == "" {
 		return fiber.NewError(400, "Empty host")
 	}

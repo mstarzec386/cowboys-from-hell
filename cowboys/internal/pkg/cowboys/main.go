@@ -8,20 +8,28 @@ type Cowboy struct {
 	Damage int    `json:"damage" xml:"damage" form:"damage"`
 }
 
-type RegisterResponseBody struct {
-	Id     string `json:"id" xml:"id" form:"id"`
+func (c Cowboy) String() string {
+	return fmt.Sprintf("Name: %s, Health: %d, Damage: %d", c.Name, c.Health, c.Damage)
+}
+
+type CowboyResponse struct {
+	Id     string  `json:"id" xml:"id" form:"id"`
 	Cowboy *Cowboy `json:"cowboy" xml:"cowboy" form:"cowboy"`
 }
 
-type RegisterRequestBody struct {
+func (c CowboyResponse) String() string {
+	return fmt.Sprintf("Id: %s, %s", c.Id, c.Cowboy.String())
+}
+
+type RegisterCowboy struct {
 	Host string `json:"host" xml:"host" form:"host"`
 	Port int    `json:"port" xml:"port" form:"port"`
 }
 
-type UpdateRequestBody struct {
-	Health int    `json:"health" xml:"health" form:"health"`
+type UpdateCowboy struct {
+	Health int `json:"health" xml:"health" form:"health"`
 }
 
-func (h *RegisterRequestBody) ToUrl(path string) string {
+func (h *RegisterCowboy) ToUrl(path string) string {
 	return fmt.Sprintf("http://%s:%d/%s", h.Host, h.Port, path)
 }
