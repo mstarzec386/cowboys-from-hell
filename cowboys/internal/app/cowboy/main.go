@@ -1,26 +1,14 @@
-
 package cowboy
 
 import (
-	"github.com/gofiber/fiber/v2"
+	"fmt"
 
-	"cowboys/internal/pkg/cowboys"
+	"cowboys/internal/app/cowboy/server"
 )
 
-func Run() {
-    app := fiber.New()
 
-    app.Get("/", func(c *fiber.Ctx) error {
-        return c.SendString("Hello, World!")
-    })
+func Run(port int) {
+	fmt.Println("Cowboy Started")
 
-	app.Get("/status", func(c *fiber.Ctx) error {
-		c.Accepts("application/json")
-
-		r := cowboys.Cowboy{Name: "fuu", Health: 10, Damage: 1}
-
-		return c.JSON(r)
-	})
-
-    app.Listen(":8000")
+	server.Run(port)
 }

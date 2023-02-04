@@ -5,5 +5,5 @@ import (
 )
 
 func main() {
-	cowboy.Run()
+	cowboy.Run(8000)
 }
