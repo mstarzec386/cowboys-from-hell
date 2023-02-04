@@ -1,1 +1,3 @@
-package redis
+package redisClient
+
+type RedisClient struct {}

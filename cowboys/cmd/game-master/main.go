@@ -5,5 +5,5 @@ import (
 )
 
 func main() {
-	gameMaster.Run()
+	gameMaster.Run(8000)
 }
