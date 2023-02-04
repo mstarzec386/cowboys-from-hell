@@ -10,10 +10,15 @@ import (
 
 func Run(port int) {
 	app := fiber.New()
+
 	game := gameController.New()
 
 	app.Get("/status", game.Status)
-	app.Post("/register", game.Register)
+	// TODO but not necessary
+	// app.Get("/cowboys/:cowboyId", game.Get)
+	app.Get("/cowboys", game.GetAll)
+	app.Post("/cowboys", game.Register)
+	app.Put("/cowboys/:cowboyId", game.Update)
 
 	app.Listen(fmt.Sprintf(":%d", port))
 }
