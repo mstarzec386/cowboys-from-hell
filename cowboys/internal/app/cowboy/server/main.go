@@ -16,7 +16,7 @@ func Run(port int, gameMasterEndpoint string) {
 
 	gameState := state.New()
 	cowboyGame := game.New(gameState, gameMasterEndpoint)
-	cowboyController := controller.New(gameState)
+	cowboyController := controller.New(cowboyGame)
 
 	app.Use(logger.New(logger.Config{
 		Format: "Request from [${ip}]:${port} ${status} - ${method} ${path}\n",
@@ -24,9 +24,10 @@ func Run(port int, gameMasterEndpoint string) {
 
 	app.Get("/stats", cowboyController.Stats)
 	app.Get("/start", cowboyController.Start)
+	app.Get("/stop", cowboyController.Stop)
 	app.Get("/hit/:damage", cowboyController.Hit)
 
-	cowboyGame.Register()
+	go cowboyGame.Register()
 
 	app.Listen(fmt.Sprintf(":%d", port))
 }

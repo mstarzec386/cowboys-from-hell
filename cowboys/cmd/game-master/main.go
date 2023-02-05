@@ -12,7 +12,7 @@ func main() {
 }
 
 func getPort() int {
-	portStr := os.Getenv("COWBOYS_SERVICE_PORT")
+	portStr := os.Getenv("GAME_MASTER_SERVICE_PORT")
 
 	port, err := strconv.Atoi(portStr)
 
