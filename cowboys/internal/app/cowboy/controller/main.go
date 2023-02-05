@@ -13,6 +13,11 @@ type CowboyController struct {
 }
 
 func (g *CowboyController) Start(c *fiber.Ctx) error {
+	if !g.Game.IsRegistered() {
+		c.Status(400)
+		return c.SendString("Cowboy not registered")
+	}
+
 	if err := g.Game.Start(); err != nil {
 		c.Status(400)
 		return c.SendString(err.Error())

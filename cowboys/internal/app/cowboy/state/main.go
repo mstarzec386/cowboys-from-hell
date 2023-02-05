@@ -32,6 +32,14 @@ func (g *GameState) SetId(id string) {
 
 	g.id = id
 }
+
+func (g *GameState) GetId() string {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+
+	return g.id
+}
+
 func (g *GameState) SetCowboy(cowboy cowboys.Cowboy) {
 	g.mu.Lock()
 	defer g.mu.Unlock()

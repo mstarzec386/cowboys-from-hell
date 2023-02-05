@@ -5,10 +5,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"strconv"
+	"sync"
 	"time"
 
 	"cowboys/internal/app/cowboy/state"
@@ -19,6 +20,7 @@ type Game struct {
 	GameMasterEdnpoint string
 	GameState          *state.GameState
 	Id                 string
+	mu                 sync.Mutex
 	ticker             *time.Ticker
 	done               chan bool
 }
@@ -27,11 +29,11 @@ func (g *Game) GetGameState() *state.GameState {
 	return g.GameState
 }
 
-func (g Game) GetCowboy() cowboys.Cowboy {
+func (g *Game) GetCowboy() cowboys.Cowboy {
 	return g.GameState.GetCowboy()
 }
 
-func (g Game) GetHealth() int {
+func (g *Game) GetHealth() int {
 	return g.GameState.GetHealth()
 }
 
@@ -40,23 +42,28 @@ func (g *Game) HitCowboy(damage int) {
 }
 
 func (g *Game) Start() error {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+
 	if g.ticker != nil {
 		return errors.New("game already started")
 	}
 
 	go g.runLoop()
+
 	return nil
 }
 
 func (g *Game) runLoop() error {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+
 	ticker := time.NewTicker(1 * time.Second)
 	g.ticker = ticker
 
 	// Use a channel to receive the Ticker's events
 	done := make(chan bool)
 	g.done = done
-
-
 
 	go func() {
 		for {
@@ -78,6 +85,10 @@ func (g *Game) runLoop() error {
 }
 
 func (g *Game) Stop() error {
+	if g.ticker == nil {
+
+		return errors.New("game already stopped")
+	}
 	g.done <- true
 	g.ticker = nil
 
@@ -87,6 +98,14 @@ func (g *Game) Stop() error {
 func (g *Game) letsPlay() {
 	fmt.Println("next round")
 
+}
+
+func (g *Game) IsRegistered() bool {
+	if g.GameState.GetId() != "" {
+		return true
+	} else {
+		return false
+	}
 }
 
 func (g *Game) Register() error {
@@ -108,7 +127,7 @@ func (g *Game) Register() error {
 
 	defer res.Body.Close()
 
-	resBody, _ := ioutil.ReadAll(res.Body)
+	resBody, _ := io.ReadAll(res.Body)
 	cowboyResponse, err := parseRegisterBody(string(resBody))
 	if err != nil {
 		return err
