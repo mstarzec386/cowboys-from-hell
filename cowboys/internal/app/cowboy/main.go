@@ -7,8 +7,8 @@ import (
 )
 
 
-func Run(port int) {
+func Run(port int, gameMasterEdnpoint string) {
 	fmt.Println("Cowboy Started")
 
-	server.Run(port)
+	server.Run(port, gameMasterEdnpoint)
 }

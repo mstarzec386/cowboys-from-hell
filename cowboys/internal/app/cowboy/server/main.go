@@ -7,18 +7,26 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 
 	"cowboys/internal/app/cowboy/controller"
+	"cowboys/internal/app/cowboy/game"
+	"cowboys/internal/app/cowboy/state"
 )
 
-func Run(port int) {
+func Run(port int, gameMasterEndpoint string) {
 	app := fiber.New()
 
-	cowboy := cowboyController.New()
+	gameState := state.New()
+	cowboyGame := game.New(gameState, gameMasterEndpoint)
+	cowboyController := controller.New(gameState)
 
 	app.Use(logger.New(logger.Config{
 		Format: "Request from [${ip}]:${port} ${status} - ${method} ${path}\n",
 	}))
 
-	app.Get("/start", cowboy.Start)
+	app.Get("/stats", cowboyController.Stats)
+	app.Get("/start", cowboyController.Start)
+	app.Get("/hit/:damage", cowboyController.Hit)
+
+	cowboyGame.Register()
 
 	app.Listen(fmt.Sprintf(":%d", port))
 }
