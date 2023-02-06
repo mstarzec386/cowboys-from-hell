@@ -127,11 +127,10 @@ func New(redisClient *redis.RedisClient) *GameState {
 	if err != nil {
 		fmt.Printf("Can't get initial data form redis, static cowboys loaded: %s\n", err.Error())
 
-		initialPlayers = append(initialPlayers, &cowboys.Cowboy{Name: "Eliot", Health: 10, Damage: 1})
+		initialPlayers = append(initialPlayers, &cowboys.Cowboy{Name: "Elto", Health: 10, Damage: 1})
 		initialPlayers = append(initialPlayers, &cowboys.Cowboy{Name: "Deth", Health: 5, Damage: 5})
 		initialPlayers = append(initialPlayers, &cowboys.Cowboy{Name: "Pawl", Health: 5, Damage: 1})
 		initialPlayers = append(initialPlayers, &cowboys.Cowboy{Name: "Dvil", Health: 8, Damage: 3})
-		initialPlayers = append(initialPlayers, &cowboys.Cowboy{Name: "Gatt", Health: 6, Damage: 1})
 		initialPlayers = append(initialPlayers, &cowboys.Cowboy{Name: "Luci", Health: 12, Damage: 2})
 
 	}
