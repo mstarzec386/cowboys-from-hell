@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/logger"
+	// "github.com/gofiber/fiber/v2/middleware/logger"
 
 	"cowboys/internal/app/cowboy/controller"
 	"cowboys/internal/app/cowboy/game"
@@ -18,9 +18,9 @@ func Run(port int, gameMasterEndpoint string) {
 	cowboyGame := game.New(gameState, gameMasterEndpoint)
 	cowboyController := controller.New(cowboyGame)
 
-	app.Use(logger.New(logger.Config{
-		Format: "Request from [${ip}]:${port} ${status} - ${method} ${path}\n",
-	}))
+	// app.Use(logger.New(logger.Config{
+	// 	Format: "Request from [${ip}]:${port} ${status} - ${method} ${path}\n",
+	// }))
 
 	app.Get("/stats", cowboyController.Stats)
 	app.Get("/start", cowboyController.Start)

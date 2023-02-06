@@ -6,6 +6,7 @@ import (
 	"cowboys/internal/pkg/cowboys"
 )
 
+// it should be CowboyState or MyState not GameState
 type GameState struct {
 	mu     sync.Mutex
 	id     string
@@ -19,11 +20,25 @@ func (g *GameState) GetCowboy() cowboys.Cowboy {
 	return *g.cowboy
 }
 
+func (g *GameState) GetName() string {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+
+	return g.cowboy.Name
+}
+
 func (g *GameState) GetHealth() int {
 	g.mu.Lock()
 	defer g.mu.Unlock()
 
 	return g.cowboy.Health
+}
+
+func (g *GameState) GetDamage() int {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+
+	return g.cowboy.Damage
 }
 
 func (g *GameState) SetId(id string) {

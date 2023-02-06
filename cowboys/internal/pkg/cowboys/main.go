@@ -33,3 +33,14 @@ type UpdateCowboy struct {
 func (h *RegisterCowboy) ToUrl(path string) string {
 	return fmt.Sprintf("http://%s:%d/%s", h.Host, h.Port, path)
 }
+
+type GameCowboy struct {
+	Id       string                  `json:"id" xml:"id" form:"id"`
+	Endpoint *RegisterCowboy `json:"endpoint" xml:"endpoint" form:"endpoint"`
+	Cowboy   *Cowboy         `json:"cowboy" xml:"cowboy" form:"cowboy"`
+}
+
+func (c GameCowboy) String() string {
+	return fmt.Sprintf("Id: %s, Name: %s, Health: %d, Damage: %d, Host: %s, Port %d",
+		c.Id, c.Cowboy.Name, c.Cowboy.Health, c.Cowboy.Damage, c.Endpoint.Host, c.Endpoint.Port)
+}

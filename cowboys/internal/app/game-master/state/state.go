@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"sync"
 
 	"cowboys/internal/pkg/cowboys"
 )
@@ -17,23 +18,13 @@ const (
 	Done       = "Done"
 )
 
-type GameCowboy struct {
-	Id       string                  `json:"id" xml:"id" form:"id"`
-	Endpoint *cowboys.RegisterCowboy `json:"endpoint" xml:"endpoint" form:"endpoint"`
-	Cowboy   *cowboys.Cowboy         `json:"cowboy" xml:"cowboy" form:"cowboy"`
-}
-
-func (c GameCowboy) String() string {
-	return fmt.Sprintf("Id: %s, Name: %s, Health: %d, Damage: %d, Host: %s, Port %d",
-		c.Id, c.Cowboy.Name, c.Cowboy.Health, c.Cowboy.Damage, c.Endpoint.Host, c.Endpoint.Port)
-}
-
 type GameState struct {
-	RegisteredPlayers []*GameCowboy     `json:"registeredPlayers" xml:"registeredPlayers" form:"registeredPlayers"`
-	InitialPlayers    []*cowboys.Cowboy `json:"initialPlayers" xml:"initialPlayers" form:"initialPlayers"`
-	PlayersNumbers    int               `json:"playersNumber" xml:"playersNumber" form:"playersNumber"`
-	Status            string            `json:"status" xml:"status" form:"status"`
-	cowboysMap        map[string]*GameCowboy
+	mu                sync.Mutex
+	RegisteredPlayers []*cowboys.GameCowboy `json:"registeredPlayers" xml:"registeredPlayers" form:"registeredPlayers"`
+	InitialPlayers    []*cowboys.Cowboy     `json:"initialPlayers" xml:"initialPlayers" form:"initialPlayers"`
+	PlayersNumbers    int                   `json:"playersNumber" xml:"playersNumber" form:"playersNumber"`
+	Status            string                `json:"status" xml:"status" form:"status"`
+	cowboysMap        map[string]*cowboys.GameCowboy
 }
 
 func (s *GameState) RegisterCowboy(registerData *cowboys.RegisterCowboy) *cowboys.CowboyResponse {
@@ -43,7 +34,7 @@ func (s *GameState) RegisterCowboy(registerData *cowboys.RegisterCowboy) *cowboy
 		newCowboy := s.InitialPlayers[lastOneIndex-1]
 		s.InitialPlayers = s.InitialPlayers[:lastOneIndex-1]
 
-		gameCowboy := GameCowboy{Cowboy: newCowboy, Endpoint: registerData, Id: generateId(newCowboy, registerData)}
+		gameCowboy := cowboys.GameCowboy{Cowboy: newCowboy, Endpoint: registerData, Id: generateId(newCowboy, registerData)}
 		s.RegisteredPlayers = append(s.RegisteredPlayers, &gameCowboy)
 
 		s.cowboysMap[gameCowboy.Id] = &gameCowboy
@@ -60,6 +51,9 @@ func (s *GameState) RegisterCowboy(registerData *cowboys.RegisterCowboy) *cowboy
 }
 
 func (s *GameState) UpdateCowboy(id string, updateData *cowboys.UpdateCowboy) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	// TODO add if state == register then should not allow
 	cowboy := s.cowboysMap[id]
 	if cowboy == nil {
@@ -68,7 +62,25 @@ func (s *GameState) UpdateCowboy(id string, updateData *cowboys.UpdateCowboy) er
 
 	cowboy.Cowboy.Health = updateData.Health
 
+	if s.allDead() {
+		fmt.Println("No winner this time, they are all dead, poor guys ―(x_x)→")
+
+	}
+
 	return nil
+}
+
+func (s *GameState) allDead() bool {
+	allDead := true
+
+	for _, cowboy := range s.RegisteredPlayers {
+		if cowboy.Cowboy.Health > 0 {
+			allDead = false
+		}
+
+	}
+
+	return allDead
 }
 
 func (s *GameState) setInprogressStatus() {
@@ -86,7 +98,7 @@ func (s *GameState) setStatus(status string) {
 	s.Status = status
 }
 
-func notifyCowboy(cowboy *GameCowboy) {
+func notifyCowboy(cowboy *cowboys.GameCowboy) {
 	cowboyUrl := cowboy.Endpoint.ToUrl("start")
 	resp, err := http.Get(cowboyUrl)
 	if err != nil || resp.StatusCode != 200 {
@@ -107,9 +119,9 @@ func New() *GameState {
 	// TODO get players from redis
 	var initialPlayers []*cowboys.Cowboy
 	initialPlayers = append(initialPlayers, &cowboys.Cowboy{Name: "Eliot", Health: 10, Damage: 1})
-	initialPlayers = append(initialPlayers, &cowboys.Cowboy{Name: "Fliz", Health: 10, Damage: 2})
+	initialPlayers = append(initialPlayers, &cowboys.Cowboy{Name: "Deth", Health: 5, Damage: 5})
 	initialPlayers = append(initialPlayers, &cowboys.Cowboy{Name: "Pawl", Health: 5, Damage: 1})
-	initialPlayers = append(initialPlayers, &cowboys.Cowboy{Name: "Dvil", Health: 15, Damage: 3})
+	initialPlayers = append(initialPlayers, &cowboys.Cowboy{Name: "Dvil", Health: 8, Damage: 3})
 	initialPlayers = append(initialPlayers, &cowboys.Cowboy{Name: "Gatt", Health: 6, Damage: 1})
 	initialPlayers = append(initialPlayers, &cowboys.Cowboy{Name: "Luci", Health: 12, Damage: 2})
 
@@ -117,5 +129,5 @@ func New() *GameState {
 
 	return &GameState{InitialPlayers: initialPlayers,
 		PlayersNumbers: playerNumbers, Status: Register,
-		cowboysMap: map[string]*GameCowboy{}}
+		cowboysMap: map[string]*cowboys.GameCowboy{}}
 }
