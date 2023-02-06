@@ -15,9 +15,10 @@ func Run(port int, gameMasterEndpoint string) {
 	app := fiber.New()
 
 	gameState := state.New()
-	cowboyGame := game.New(gameState, gameMasterEndpoint)
+	cowboyGame := game.New(gameState, gameMasterEndpoint, port)
 	cowboyController := controller.New(cowboyGame)
 
+	// removed for better clarity in logs
 	// app.Use(logger.New(logger.Config{
 	// 	Format: "Request from [${ip}]:${port} ${status} - ${method} ${path}\n",
 	// }))

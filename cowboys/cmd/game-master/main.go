@@ -8,9 +8,11 @@ import (
 )
 
 func main() {
-	gameMaster.Run(getPort())
+	// TODO get redis host from env or smthing
+	gameMaster.Run(getPort(), "redis")
 }
 
+// not needed
 func getPort() int {
 	portStr := os.Getenv("GAME_MASTER_SERVICE_PORT")
 

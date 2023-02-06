@@ -9,7 +9,6 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
-	// "strconv"
 	"sync"
 	"time"
 
@@ -21,6 +20,7 @@ type Game struct {
 	GameMasterEdnpoint string
 	GameState          *state.GameState
 	gameCowboys        []*cowboys.GameCowboy
+	localPort			int
 	mu                 sync.Mutex
 	ticker             *time.Ticker
 	done               chan bool
@@ -92,13 +92,11 @@ func (g *Game) IsRegistered() bool {
 
 func (g *Game) Register() error {
 	registerEndpoint := fmt.Sprintf("%s/cowboys", g.GameMasterEdnpoint)
-	myEndpoint := getMyEndpoint()
+	myEndpoint := getMyEndpoint(g.localPort)
 	myEndpointJson, err := json.Marshal(myEndpoint)
 	if err != nil {
 		return err
 	}
-
-	// fmt.Printf("register: %s with %s\n", registerEndpoint, myEndpointJson)
 
 	res, err := http.Post(registerEndpoint, "application/json", bytes.NewBuffer([]byte(myEndpointJson)))
 	if err != nil {
@@ -140,18 +138,6 @@ func parseCowboysBody(body string) ([]*cowboys.GameCowboy, error) {
 	return cowboys, nil
 }
 
-func getMyEndpoint() cowboys.RegisterCowboy {
-	host := os.Getenv("POD_IP")
-	// portStr := os.Getenv("COWBOYS_SERVICE_PORT")
-
-	// port, err := strconv.Atoi(portStr)
-
-	// if err != nil {
-	// 	panic("port not a number? how to live what to do (sad)")
-	// }
-
-	return cowboys.RegisterCowboy{Host: host, Port: 8000}
-}
 
 func (g *Game) runLoop() {
 	g.mu.Lock()
@@ -268,7 +254,7 @@ func PutRequest(url string, contentType string, body io.Reader) (resp *http.Resp
 
 	req, err := http.NewRequest(http.MethodPut, url, body)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	req.Header.Set("Content-Type", contentType)
@@ -287,13 +273,9 @@ func hitVictim(victim *cowboys.GameCowboy, damage int) error {
 
 	defer res.Body.Close()
 
-	// resBody, _ := io.ReadAll(res.Body)
-
 	if res.StatusCode == 400 {
 		fmt.Printf("Shit, He is already dead\n")
 	}
-
-	// fmt.Println("Response from victim", res.StatusCode, string(resBody))
 
 	return nil
 }
@@ -306,6 +288,12 @@ func getRandom(n int) int {
 	return random.Intn(n)
 }
 
-func New(state *state.GameState, masterEndpoint string) *Game {
-	return &Game{GameState: state, GameMasterEdnpoint: masterEndpoint}
+func getMyEndpoint(port int) cowboys.RegisterCowboy {
+	host := os.Getenv("POD_IP")
+
+	return cowboys.RegisterCowboy{Host: host, Port: port}
+}
+
+func New(state *state.GameState, masterEndpoint string, port int) *Game {
+	return &Game{GameState: state, GameMasterEdnpoint: masterEndpoint, localPort: port}
 }

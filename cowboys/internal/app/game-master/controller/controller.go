@@ -8,6 +8,7 @@ import (
 	// "cowboys/internal/pkg/clients/redis"
 	"cowboys/internal/app/game-master/state"
 	"cowboys/internal/pkg/cowboys"
+	"cowboys/internal/pkg/clients/redis"
 )
 
 type GameController struct {
@@ -36,7 +37,7 @@ func (g *GameController) Register(c *fiber.Ctx) error {
 		return fiber.NewError(404, "No cowboys available")
 	}
 
-	fmt.Printf("Cowboy Registered\n%s\nEndpoint: %s\n\n", registerResponse.String(), registerData.ToUrl(""))
+	fmt.Printf("Cowboy Registered\n%s\nEndpoint: %s\n", registerResponse.String(), registerData.ToUrl(""))
 
 	return c.JSON(registerResponse)
 }
@@ -59,8 +60,8 @@ func (g *GameController) GetAll(c *fiber.Ctx) error {
 	return c.JSON(g.GameState.RegisteredPlayers)
 }
 
-func New() *GameController {
-	gameState := state.New()
+func New(redisClient *redis.RedisClient) *GameController {
+	gameState := state.New(redisClient)
 
 	return &GameController{GameState: gameState}
 }

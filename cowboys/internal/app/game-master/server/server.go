@@ -7,12 +7,14 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 
 	"cowboys/internal/app/game-master/controller"
+	"cowboys/internal/pkg/clients/redis"
 )
 
-func Run(port int) {
+func Run(port int, redisHost string) {
 	app := fiber.New()
 
-	game := gameController.New()
+	redisCli := redis.New(redisHost)
+	game := gameController.New(redisCli)
 
 	app.Use(logger.New(logger.Config{
 		Format: "Request from [${ip}]:${port} ${status} - ${method} ${path}\n",

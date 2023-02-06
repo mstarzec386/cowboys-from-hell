@@ -3,11 +3,14 @@ package state
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"sync"
 
+	"cowboys/internal/pkg/clients/redis"
 	"cowboys/internal/pkg/cowboys"
 )
 
@@ -19,15 +22,18 @@ const (
 )
 
 type GameState struct {
-	mu                sync.Mutex
 	RegisteredPlayers []*cowboys.GameCowboy `json:"registeredPlayers" xml:"registeredPlayers" form:"registeredPlayers"`
 	InitialPlayers    []*cowboys.Cowboy     `json:"initialPlayers" xml:"initialPlayers" form:"initialPlayers"`
 	PlayersNumbers    int                   `json:"playersNumber" xml:"playersNumber" form:"playersNumber"`
 	Status            string                `json:"status" xml:"status" form:"status"`
+	mu                sync.Mutex
 	cowboysMap        map[string]*cowboys.GameCowboy
 }
 
 func (s *GameState) RegisterCowboy(registerData *cowboys.RegisterCowboy) *cowboys.CowboyResponse {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	lastOneIndex := len(s.InitialPlayers)
 
 	if lastOneIndex > 0 {
@@ -102,11 +108,11 @@ func notifyCowboy(cowboy *cowboys.GameCowboy) {
 	cowboyUrl := cowboy.Endpoint.ToUrl("start")
 	resp, err := http.Get(cowboyUrl)
 	if err != nil || resp.StatusCode != 200 {
-		// TODO :D
-		panic(err)
+		// TODO what to do then?
+		log.Printf("Notify cowboy failed %s\n", err.Error())
 	}
 
-	fmt.Printf("Cowboy notified: %s", cowboy.String())
+	fmt.Printf("Cowboy notified: %s\n", cowboy.String())
 }
 
 func generateId(cowboy *cowboys.Cowboy, registerData *cowboys.RegisterCowboy) string {
@@ -115,19 +121,38 @@ func generateId(cowboy *cowboys.Cowboy, registerData *cowboys.RegisterCowboy) st
 	return hex.EncodeToString(hash[:])
 }
 
-func New() *GameState {
-	// TODO get players from redis
-	var initialPlayers []*cowboys.Cowboy
-	initialPlayers = append(initialPlayers, &cowboys.Cowboy{Name: "Eliot", Health: 10, Damage: 1})
-	initialPlayers = append(initialPlayers, &cowboys.Cowboy{Name: "Deth", Health: 5, Damage: 5})
-	initialPlayers = append(initialPlayers, &cowboys.Cowboy{Name: "Pawl", Health: 5, Damage: 1})
-	initialPlayers = append(initialPlayers, &cowboys.Cowboy{Name: "Dvil", Health: 8, Damage: 3})
-	initialPlayers = append(initialPlayers, &cowboys.Cowboy{Name: "Gatt", Health: 6, Damage: 1})
-	initialPlayers = append(initialPlayers, &cowboys.Cowboy{Name: "Luci", Health: 12, Damage: 2})
+func New(redisClient *redis.RedisClient) *GameState {
+	initialPlayers, err := getInitialPlayers(redisClient)
+	// FALLBACK
+	if err != nil {
+		fmt.Printf("Can't get initial data form redis, static cowboys loaded: %s\n", err.Error())
+
+		initialPlayers = append(initialPlayers, &cowboys.Cowboy{Name: "Eliot", Health: 10, Damage: 1})
+		initialPlayers = append(initialPlayers, &cowboys.Cowboy{Name: "Deth", Health: 5, Damage: 5})
+		initialPlayers = append(initialPlayers, &cowboys.Cowboy{Name: "Pawl", Health: 5, Damage: 1})
+		initialPlayers = append(initialPlayers, &cowboys.Cowboy{Name: "Dvil", Health: 8, Damage: 3})
+		initialPlayers = append(initialPlayers, &cowboys.Cowboy{Name: "Gatt", Health: 6, Damage: 1})
+		initialPlayers = append(initialPlayers, &cowboys.Cowboy{Name: "Luci", Health: 12, Damage: 2})
+
+	}
 
 	playerNumbers := len(initialPlayers)
 
 	return &GameState{InitialPlayers: initialPlayers,
 		PlayersNumbers: playerNumbers, Status: Register,
 		cowboysMap: map[string]*cowboys.GameCowboy{}}
+}
+
+func getInitialPlayers(redisClient *redis.RedisClient) ([]*cowboys.Cowboy, error) {
+	var initialPlayers = []*cowboys.Cowboy{}
+	data, err := redisClient.Get("init")
+	if err != nil {
+		return initialPlayers, err
+	}
+
+	if err := json.Unmarshal([]byte(data), &initialPlayers); err != nil {
+		return initialPlayers, err
+	}
+
+	return initialPlayers, nil
 }
