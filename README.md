@@ -60,7 +60,7 @@ alias kubectl="minikube kubectl --"
 while [ true ]; do kubectl logs -f -l run=cowboys --max-log-requests=20 --tail=10000; done
 ```
 
-Game-master logs in third terminal
+Game-master logs in third terminal (optional)
 ```bash
 alias kubectl="minikube kubectl --"
 while [ true ]; do kubectl logs -f deployment/game-master ; done

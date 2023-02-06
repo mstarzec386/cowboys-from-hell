@@ -70,7 +70,6 @@ func (s *GameState) UpdateCowboy(id string, updateData *cowboys.UpdateCowboy) er
 
 	if s.allDead() {
 		fmt.Println("No winner this time, they are all dead, poor guys ―(x_x)→")
-
 	}
 
 	return nil
@@ -123,7 +122,8 @@ func generateId(cowboy *cowboys.Cowboy, registerData *cowboys.RegisterCowboy) st
 
 func New(redisClient *redis.RedisClient) *GameState {
 	initialPlayers, err := getInitialPlayers(redisClient)
-	// FALLBACK
+
+	// FALLBACK if redis is not working
 	if err != nil {
 		fmt.Printf("Can't get initial data form redis, static cowboys loaded: %s\n", err.Error())
 

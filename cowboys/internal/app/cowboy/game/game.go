@@ -49,13 +49,13 @@ func (g *Game) HitCowboy(damage int) {
 	g.GameState.HitCowboy(damage)
 	g.raportState()
 
-	fmt.Printf("Oh someones hits (%d) me (%d) ಥ_ಥ", damage, g.GetHealth())
+	g.Log("Oh someones hits (%d) me (%d) ಥ_ಥ", damage, g.GetHealth())
 	if g.GameState.GetHealth() < 1 {
-		fmt.Println(" and killed (✖╭╮✖)")
+		fmt.Printf(" and killed (✖╭╮✖)")
 		g.Stop()
 	}
-	fmt.Println("")
 
+	fmt.Println("")
 }
 
 func (g *Game) Start() error {
@@ -163,13 +163,8 @@ func (g *Game) runLoop() {
 }
 
 func (g *Game) letsPlay() {
-	// fmt.Println("Next round")
-	fmt.Println("")
 	g.pullCowboysState()
 	g.shoot()
-	// if g.GameState.GetHealth() < 1 {
-	// 	g.Stop()
-	// }
 }
 
 func (g *Game) filterCowboysState(cowboysState []*cowboys.GameCowboy) []*cowboys.GameCowboy {
@@ -214,7 +209,7 @@ func (g *Game) shoot() {
 	numberOfPlayers := len(g.gameCowboys)
 
 	if numberOfPlayers < 1 {
-		fmt.Printf("I WIN!!!\nFck yea motherfuckers!\n\\(ᵔᵕᵔ)/   \\(ᵔᵕᵔ)/   \\(ᵔᵕᵔ)/\n")
+		g.Log("I WIN!!!! \\(ᵔᵕᵔ)/   \\(ᵔᵕᵔ)/   \\(ᵔᵕᵔ)/\n")
 
 		g.Stop()
 		return
@@ -225,8 +220,7 @@ func (g *Game) shoot() {
 
 	// would be nice to have method like this
 	// victim.Hit()
-
-	hitVictim(victim, g.GameState.GetDamage())
+	g.hitVictim(victim, g.GameState.GetDamage())
 }
 
 func (g *Game) raportState() error {
@@ -236,7 +230,6 @@ func (g *Game) raportState() error {
 		return err
 	}
 
-	// fmt.Printf("Raport state: %s with %s\n", registerEndpoint, myStateJson)
 	res, err := PutRequest(registerEndpoint, "application/json", bytes.NewBuffer([]byte(myStateJson)))
 	if err != nil {
 		return err
@@ -244,9 +237,13 @@ func (g *Game) raportState() error {
 
 	defer res.Body.Close()
 
-	// resBody, _ := io.ReadAll(res.Body)
 
 	return nil
+}
+
+func (g *Game) Log(format string, a ...any) {
+	fmt.Printf("%s: ", g.GameState.GetName())
+	fmt.Printf(format, a...)
 }
 
 func PutRequest(url string, contentType string, body io.Reader) (resp *http.Response, err error) {
@@ -263,9 +260,9 @@ func PutRequest(url string, contentType string, body io.Reader) (resp *http.Resp
 	return res, err
 }
 
-func hitVictim(victim *cowboys.GameCowboy, damage int) error {
+func (g *Game) hitVictim(victim *cowboys.GameCowboy, damage int) error {
 	// TODO move paths to const
-	fmt.Printf("Hit victim %s (%d)\n", victim.Cowboy.Name, victim.Cowboy.Health)
+    g.Log("Hit victim %s (%d)\n", victim.Cowboy.Name, victim.Cowboy.Health)
 	res, err := http.Get(victim.Endpoint.ToUrl(fmt.Sprintf("hit/%d", damage)))
 	if err != nil {
 		return err
@@ -274,7 +271,7 @@ func hitVictim(victim *cowboys.GameCowboy, damage int) error {
 	defer res.Body.Close()
 
 	if res.StatusCode == 400 {
-		fmt.Printf("Shit, He is already dead\n")
+		g.Log("Shit, He is already dead\n")
 	}
 
 	return nil
