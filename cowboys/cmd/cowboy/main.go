@@ -1,17 +1,17 @@
 package main
 
 import (
-	"os"
-	"strconv"
+	// "os"
+	// "strconv"
 
 	"cowboys/internal/app/cowboy"
 )
 
 func main() {
-	cowboy.Run(getPort(), "http://localhost:8000")
+	cowboy.Run(8000, "http://game-master:8000")
 }
 
-func getPort() int {
+/* func getPort() int {
 	portStr := os.Getenv("COWBOYS_SERVICE_PORT")
 
 	port, err := strconv.Atoi(portStr)
@@ -21,4 +21,4 @@ func getPort() int {
 	}
 
 	return port
-}
+} */

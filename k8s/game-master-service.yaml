@@ -6,7 +6,7 @@ metadata:
     run: game-master
 spec:
   ports:
-  - port: 80
+  - port: 8000
     protocol: TCP
   selector:
     run: game-master

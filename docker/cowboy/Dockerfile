@@ -11,13 +11,11 @@ COPY internal ./internal
 RUN cd cmd/cowboy && go build -o /cowboy
 
 ## Deploy
-FROM alpine:3.17
+FROM amazonlinux:2022
 
 WORKDIR /
 
-RUN adduser -D nonroot
-
-USER nonroot:nonroot
+USER nobody:nobody
 
 COPY --from=build /cowboy /cowboy
 

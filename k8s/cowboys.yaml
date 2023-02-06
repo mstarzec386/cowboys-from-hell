@@ -6,15 +6,20 @@ spec:
   selector:
     matchLabels:
       run: cowboys
-  replicas: 3
+  replicas: 6
   template:
     metadata:
       labels:
         run: cowboys
     spec:
       containers:
-      - name: cowboys
-        imagePullPolicy: Never
-        image: nginx:latest
-        ports:
-        - containerPort: 8000
+        - name: cowboys
+          imagePullPolicy: Never
+          image: cowboy:latest
+          env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+          ports:
+            - containerPort: 8000

@@ -9,7 +9,7 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
-	"strconv"
+	// "strconv"
 	"sync"
 	"time"
 
@@ -141,16 +141,16 @@ func parseCowboysBody(body string) ([]*cowboys.GameCowboy, error) {
 }
 
 func getMyEndpoint() cowboys.RegisterCowboy {
-	host := os.Getenv("COWBOYS_SERVICE_HOST")
-	portStr := os.Getenv("COWBOYS_SERVICE_PORT")
+	host := os.Getenv("POD_IP")
+	// portStr := os.Getenv("COWBOYS_SERVICE_PORT")
 
-	port, err := strconv.Atoi(portStr)
+	// port, err := strconv.Atoi(portStr)
 
-	if err != nil {
-		panic("port not a number? how to live what to do (sad)")
-	}
+	// if err != nil {
+	// 	panic("port not a number? how to live what to do (sad)")
+	// }
 
-	return cowboys.RegisterCowboy{Host: host, Port: port}
+	return cowboys.RegisterCowboy{Host: host, Port: 8000}
 }
 
 func (g *Game) runLoop() {

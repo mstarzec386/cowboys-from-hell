@@ -7,18 +7,15 @@ COPY go.mod ./
 COPY go.sum ./
 COPY cmd ./cmd
 COPY internal ./internal
-COPY pkg ./pkg
 
 RUN cd cmd/game-master && go build -o /game-master
 
 ## Deploy
-FROM alpine:3.17
+FROM amazonlinux:2022
 
 WORKDIR /
 
-RUN adduser -D nonroot
-
-USER nonroot:nonroot
+USER nobody:nobody
 
 COPY --from=build /game-master /game-master
 
