@@ -92,3 +92,27 @@ minikube stop
 minikube delete
 ```
 
+# Example logs from cowboys
+
+```
+Registered as Name: Sam, Health: 10, Damage: 1
+Registered as Name: Philip, Health: 15, Damage: 1
+Registered as Name: Peter, Health: 5, Damage: 3
+Registered as Name: John, Health: 10, Damage: 1
+Registered as Name: Bill, Health: 8, Damage: 2
+...
+Philip: Oh someones hits (2) me (0) ಥ_ಥ and killed (✖╭╮✖)
+Bill: Oh someones hits (1) me (4) ಥ_ಥ
+John: Hit victim Philip (3)
+Bill: Hit victim Philip (11)
+Bill: Hit victim Philip (7)
+Bill: Hit victim Sam (2)
+John: Oh someones hits (1) me (2) ಥ_ಥ
+John: Hit victim Bill (4)
+John: Oh someones hits (1) me (1) ಥ_ಥ
+Bill: Hit victim Philip (2)
+Bill: Oh someones hits (1) me (3) ಥ_ಥ
+John: Oh someones hits (2) me (0) ಥ_ಥ and killed (✖╭╮✖)
+Bill: Hit victim John (1)
+Bill: I WIN!!!! \(ᵔᵕᵔ)/   \(ᵔᵕᵔ)/   \(ᵔᵕᵔ)/
+```
