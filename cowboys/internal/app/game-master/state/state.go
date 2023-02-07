@@ -120,7 +120,7 @@ func generateId(cowboy *cowboys.Cowboy, registerData *cowboys.RegisterCowboy) st
 	return hex.EncodeToString(hash[:])
 }
 
-func New(redisClient *redis.RedisClient) *GameState {
+func New(redisClient redis.RedisClientInterface) *GameState {
 	initialPlayers, err := getInitialPlayers(redisClient)
 
 	// FALLBACK if redis is not working
@@ -142,7 +142,7 @@ func New(redisClient *redis.RedisClient) *GameState {
 		cowboysMap: map[string]*cowboys.GameCowboy{}}
 }
 
-func getInitialPlayers(redisClient *redis.RedisClient) ([]*cowboys.Cowboy, error) {
+func getInitialPlayers(redisClient redis.RedisClientInterface) ([]*cowboys.Cowboy, error) {
 	var initialPlayers = []*cowboys.Cowboy{}
 	data, err := redisClient.Get("init")
 	if err != nil {

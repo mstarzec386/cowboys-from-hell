@@ -9,6 +9,11 @@ import (
 
 var ctx = context.Background()
 
+type RedisClientInterface interface {
+    Get(key string) (string, error)
+    Set(key string, data interface{}) error
+}
+
 type RedisClient struct {
 	rdb *redis.Client
 }

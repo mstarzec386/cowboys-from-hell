@@ -12,7 +12,6 @@ import (
 )
 
 type GameController struct {
-	// redisClient    redisClient.RedisClient
 	GameState *state.GameState
 }
 
@@ -60,7 +59,7 @@ func (g *GameController) GetAll(c *fiber.Ctx) error {
 	return c.JSON(g.GameState.RegisteredPlayers)
 }
 
-func New(redisClient *redis.RedisClient) *GameController {
+func New(redisClient redis.RedisClientInterface) *GameController {
 	gameState := state.New(redisClient)
 
 	return &GameController{GameState: gameState}
